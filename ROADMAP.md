@@ -4,19 +4,19 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-- **phase-4-build-slice-1** — in flight: `general-purpose-engineer` (conv `ca41387e`) building BinaryBourbon/tidepool (Next.js + Postgres + CRUD + Render deploy). Branch: `slice-1/foundation`.
+- **phase-5-build-slice-2** — in flight: `general-purpose-engineer` dispatched; building execute loop (AoD dispatch + SSE proxy + PR detection). Branch: `slice-2/execute-loop`. Target: BinaryBourbon/tidepool.
 
 ## Next (≤3 queued)
 
-- **phase-5-build-slice-2** — execute loop (AoD dispatch, SSE stream proxy, PR review surface). Blocked on slice-1 merge.
 - **phase-6-build-slice-3** — follow-up loop (PostHog funnel widget, Honeycomb signals, anomaly path). PostHog API shape resolved — see `research/posthog-funnel-api.md`. Note: `POSTHOG_PROJECT_ID` must be added to Render env vars (gap found in spike).
 
 ## Gates pending human input
 
-- **G3 (first)** — slice acceptance. Once slice-1 deploys and the Render URL is verified, tech-lead summarizes and asks: "Ship this slice live to users? Move to slice-2?"
+- **G4 (next)** — slice-2 acceptance. Once execute loop deploys and dogfood test passes, tech-lead summarizes and asks: "Execute loop working end-to-end? Move to slice-3?"
 
 ## Done (last 5)
 
+- **phase-4-build-slice-1** — `general-purpose-engineer` (conv `ca41387e`) built BinaryBourbon/tidepool foundation (Next.js + Postgres + CRUD + Render deploy); PR #1 merged at `72bad93d`. Deployed: https://tidepool-web-77nd.onrender.com. G3 closed. Flagged defaults: repo public (no secrets committed), Prisma v5.22, deploy branch pointing to slice-1/foundation (flip to main in Render dashboard).
 - **phase-4-spike-posthog-funnel-api** — `general-purpose-engineer` (conv `9f1461aa`) produced `research/posthog-funnel-api.md`; PR #8 merged at `c1cd641`. PostHog FunnelsQuery API documented; flag cohort filter approach confirmed; `POSTHOG_PROJECT_ID` env var gap identified.
 - **phase-3-architecture** — `general-purpose-engineer` (conv `0095e9ad`) produced `specs/v0/architecture.md`; PR #7 merged at `6cb23f1`. G2 closed: AoD override applied per ADR-0007. See ADR-0006, ADR-0007.
 - **phase-2-design** — `designer` (conv `689651fc`) produced `design/v0/` + `specs/v0/spec.md`; PR #6 merged at `f284c66`. Execute model amended to prompt-driven per ADR-0006. See ADR-0006.
