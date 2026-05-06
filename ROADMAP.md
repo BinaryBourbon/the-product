@@ -4,19 +4,19 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-_Nothing in flight — blocked on G0._
+_Nothing in flight._
 
 ## Next (≤3 queued)
 
-_Nothing queued — blocked on G0._
+- **phase-1-narrative** — `growth-marketer` dispatched; awaiting PR with `narrative/phase-1-press-release.md`. Blocked on G1.
 
 ## Gates pending human input
 
-- **G0** — project framing. Discovery complete. Read [`discovery/phase-0-framing.md`](./discovery/phase-0-framing.md) and [`decisions/0002-g0-pending.md`](./decisions/0002-g0-pending.md), then pick a candidate (or reframe). Three questions to weigh: (1) behavior-change appetite, (2) go-to-market model, (3) pre-G1 technical risk tolerance.
+- **G1** — narrative. Once `narrative/phase-1-press-release.md` lands, tech-lead summarizes and asks: "Does this product, described this way, sound worth building?"
 
 ## Done (last 5)
 
-- **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. Shipped.
+- **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B selected with reframe (cross-tool latent-graph traversal, not dashboard). See ADR-0002, ADR-0003.
 - **pr-template** — `general-purpose-engineer` (conv `bf816216`) added `.github/PULL_REQUEST_TEMPLATE.md`; PR #2 merged at `d916581`. Shipped.
 - **loop-test/add-contributing-md** — `general-purpose-engineer` (conv `e2bfc3fc`) added one-line `CONTRIBUTING.md`; PR #1 reviewed and merged. Shipped.
 
