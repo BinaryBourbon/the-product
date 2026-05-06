@@ -4,18 +4,19 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-- **phase-5-build-slice-2** — in flight: `general-purpose-engineer` dispatched; building execute loop (AoD dispatch + SSE proxy + PR detection). Branch: `slice-2/execute-loop`. Target: BinaryBourbon/tidepool.
+- **phase-6-build-slice-3** — in flight: `general-purpose-engineer` dispatched; building follow-up loop (enable-flag action, Follow-up View Screens 5/6, PostHog funnel delta, Honeycomb signals, anomaly path). Branch: `slice-3/follow-up-loop`. Target: BinaryBourbon/tidepool.
 
 ## Next (≤3 queued)
 
-- **phase-6-build-slice-3** — follow-up loop (PostHog funnel widget, Honeycomb signals, anomaly path). PostHog API shape resolved — see `research/posthog-funnel-api.md`. Note: `POSTHOG_PROJECT_ID` must be added to Render env vars (gap found in spike).
+_(empty — no queued slices)_
 
 ## Gates pending human input
 
-- **G4 (next)** — slice-2 acceptance. Once execute loop deploys and dogfood test passes, tech-lead summarizes and asks: "Execute loop working end-to-end? Move to slice-3?"
+- **G4 (next)** — slice-3 acceptance. Once follow-up loop deploys and acceptance criteria pass (enable-flag transition, Follow-up View with real data, anomaly path, Mark as Done), tech-lead summarizes and asks: "Follow-up loop working end-to-end? v0 complete?"
 
 ## Done (last 5)
 
+- **phase-5-build-slice-2** — `general-purpose-engineer` (conv `7ce1de25`) built execute loop; PR #2 on tidepool merged at `5daaa792`. Dogfood proof: PR #9 on the-product merged at `66d70e0f` (AoD agent dispatched FROM deployed Tidepool opened a real PR). G4 gate advanced. Defensible defaults: `idle` AoD status treated as terminal.
 - **phase-4-build-slice-1** — `general-purpose-engineer` (conv `ca41387e`) built BinaryBourbon/tidepool foundation (Next.js + Postgres + CRUD + Render deploy); PR #1 merged at `72bad93d`. Deployed: https://tidepool-web-77nd.onrender.com. G3 closed. Flagged defaults: repo public (no secrets committed), Prisma v5.22, deploy branch pointing to slice-1/foundation (flip to main in Render dashboard).
 - **phase-4-spike-posthog-funnel-api** — `general-purpose-engineer` (conv `9f1461aa`) produced `research/posthog-funnel-api.md`; PR #8 merged at `c1cd641`. PostHog FunnelsQuery API documented; flag cohort filter approach confirmed; `POSTHOG_PROJECT_ID` env var gap identified.
 - **phase-3-architecture** — `general-purpose-engineer` (conv `0095e9ad`) produced `specs/v0/architecture.md`; PR #7 merged at `6cb23f1`. G2 closed: AoD override applied per ADR-0007. See ADR-0006, ADR-0007.
