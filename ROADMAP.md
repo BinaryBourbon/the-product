@@ -2,20 +2,25 @@
 
 Single source of truth for what's open. If this doc is longer than one screen, kill or defer something.
 
+## Status: v0 feature-complete — pending live integration testing
+
+All three planned v0 slices are shipped (foundation, execute loop, follow-up loop). The v0 thesis is proven: slice-2 dogfooded the full plan/execute loop (AoD agent dispatched from Tidepool's deployed instance opened PR #9 on BinaryBourbon/the-product). Slice-3 completes the follow-up loop. **Live PostHog + Honeycomb data requires two env vars to be set in the Render dashboard:** `POSTHOG_PROJECT_ID` and `HONEYCOMB_DATASET` (not secrets — set as plain config). Until set, the Follow-up View renders gracefully with "No data available."
+
 ## Now (≤2 slices in flight)
 
-- **phase-6-build-slice-3** — in flight: `general-purpose-engineer` dispatched; building follow-up loop (enable-flag action, Follow-up View Screens 5/6, PostHog funnel delta, Honeycomb signals, anomaly path). Branch: `slice-3/follow-up-loop`. Target: BinaryBourbon/tidepool.
+_(empty)_
 
 ## Next (≤3 queued)
 
-_(empty — no queued slices)_
+- **phase-7-polish-slice-4 (optional)** — live integration testing with real PostHog/Honeycomb data; set `POSTHOG_PROJECT_ID` + `HONEYCOMB_DATASET` in Render dashboard; end-to-end walk through the full plan/execute/follow-up loop with a real work item. Dispatch only if human decides to continue.
 
 ## Gates pending human input
 
-- **G4 (next)** — slice-3 acceptance. Once follow-up loop deploys and acceptance criteria pass (enable-flag transition, Follow-up View with real data, anomaly path, Mark as Done), tech-lead summarizes and asks: "Follow-up loop working end-to-end? v0 complete?"
+_(none open — G4 closed with slice-3 acceptance)_
 
 ## Done (last 5)
 
+- **phase-6-build-slice-3** — `general-purpose-engineer` (conv `0adb7c4d`) built follow-up loop; PR #3 on tidepool merged at `c6c4eab5`. Deployed: https://tidepool-web-77nd.onrender.com. G4 closed. Implements: enable-flag action (rollout % → PostHog baseline capture → flag enable → state `shipped`), Follow-up View Screens 5 (success) + 6 (anomaly), Honeycomb error rate + p99 latency, anomaly path (PostHog event → GitHub PR pre-populated), rollback-flag CTA, Mark as Done (`shipped → done`), `follow_up_checks` rows per §4, 5-min response cache. Bonus: rollback-flag action. Env vars needed for live data: set `POSTHOG_PROJECT_ID` + `HONEYCOMB_DATASET` in Render dashboard.
 - **phase-5-build-slice-2** — `general-purpose-engineer` (conv `7ce1de25`) built execute loop; PR #2 on tidepool merged at `5daaa792`. Dogfood proof: PR #9 on the-product merged at `66d70e0f` (AoD agent dispatched FROM deployed Tidepool opened a real PR). G4 gate advanced. Defensible defaults: `idle` AoD status treated as terminal.
 - **phase-4-build-slice-1** — `general-purpose-engineer` (conv `ca41387e`) built BinaryBourbon/tidepool foundation (Next.js + Postgres + CRUD + Render deploy); PR #1 merged at `72bad93d`. Deployed: https://tidepool-web-77nd.onrender.com. G3 closed. Flagged defaults: repo public (no secrets committed), Prisma v5.22, deploy branch pointing to slice-1/foundation (flip to main in Render dashboard).
 - **phase-4-spike-posthog-funnel-api** — `general-purpose-engineer` (conv `9f1461aa`) produced `research/posthog-funnel-api.md`; PR #8 merged at `c1cd641`. PostHog FunnelsQuery API documented; flag cohort filter approach confirmed; `POSTHOG_PROJECT_ID` env var gap identified.
