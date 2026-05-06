@@ -4,19 +4,21 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-- **phase-1-narrative** — in flight: `growth-marketer` (v2) dispatched against ADR-0004; awaiting PR with `narrative/phase-1-press-release.md`.
+- **phase-2-design** — in flight: `designer` dispatched; producing `design/v0/` flows + `specs/v0/spec.md` for the smallest IDE-replacing Tidepool v0 slice.
 
 ## Next (≤3 queued)
 
-_Nothing queued — blocked on G1._
+_Nothing queued — blocked on G2._
 
 ## Gates pending human input
 
-- **G1** — narrative (reopened). PR #4 closed (framing too narrow — cross-tool graph described as product, not capability). New `growth-marketer` dispatched against ADR-0004 (workspace replacing IDE, engineers + PMs, plan/execute/follow-up). Once new PR lands, tech-lead summarizes and asks: "Does this product, described this way, sound worth building?"
+- **G2** — architecture. Once `specs/v0/spec.md` lands, tech-lead summarizes and asks: "Are we aligned on the tech direction?" Key open question: embedded code editor vs. launched IDE with deep-linking.
 
 ## Done (last 5)
 
+- **phase-1-narrative** — `growth-marketer` (conv `10fdf4c5`) produced `narrative/phase-1-press-release.md`; PR #5 merged at `9b20632`. G1 closed: framing approved, product named Tidepool. See ADR-0004, ADR-0005.
 - **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B + two reframes. See ADR-0002 → ADR-0003 → ADR-0004.
+- **pr-template** — `general-purpose-engineer` (conv `bf816216`) added `.github/PULL_REQUEST_TEMPLATE.md`; PR #2 merged at `d916581`. Shipped.
 - **pr-template** — `general-purpose-engineer` (conv `bf816216`) added `.github/PULL_REQUEST_TEMPLATE.md`; PR #2 merged at `d916581`. Shipped.
 - **loop-test/add-contributing-md** — `general-purpose-engineer` (conv `e2bfc3fc`) added one-line `CONTRIBUTING.md`; PR #1 reviewed and merged. Shipped.
 
