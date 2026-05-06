@@ -61,7 +61,7 @@ When dispatching a specialist, the tech-lead writes a **brief** — a small mark
 
 ## Context
 - Slice: <slice-name>
-- Repo: https://github.com/binarybourbon/the-product (clone this; work in branch `<slice-name>/<your-role>`)
+- Repo: https://github.com/BinaryBourbon/the-product (clone this; work in branch `<slice-name>/<your-role>`)
 - Prior artifacts you should read: <links to repo files>
 
 ## Task
