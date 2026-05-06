@@ -4,15 +4,11 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-_Nothing in flight yet — pre-G0._
+- **phase-0-framing** — in flight: `customer-researcher` dispatched; awaiting PR with `discovery/phase-0-framing.md`
 
 ## Next (≤3 queued)
 
-- **phase-0-framing** — Pick the product. Two candidates the human has named:
-  1. A modern Slack replacement that treats bots as first-class citizens.
-  2. A single pane of glass that replaces Jira/GitHub/PostHog for engineers and product.
-
-  Tech-lead's first move: dispatch `customer-researcher` to write a side-by-side framing of both — who the user is, the strongest pain each addresses, the smallest validatable wedge each implies. Output: `discovery/phase-0-framing.md`.
+_Nothing queued — blocked on G0._
 
 ## Gates pending human input
 
