@@ -4,15 +4,17 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-_Nothing in flight — awaiting G2 green-light on first build slice scope._
+- **phase-4-build-slice-1** — in flight: `general-purpose-engineer` dispatched; building BinaryBourbon/tidepool repo (Next.js + Postgres + CRUD + Render deploy). Branch: `slice-1/foundation`.
+- **phase-4-spike-posthog-funnel-api** — in flight: `general-purpose-engineer` dispatched; researching PostHog Insights API shape for funnel before/after queries. Output: `research/posthog-funnel-api.md` in this repo.
 
 ## Next (≤3 queued)
 
-- **phase-4-build-slice-1** — queued; awaiting human scope approval before dispatch. Architecture is settled (ADR-0006 + ADR-0007). Three open spikes to resolve: PostHog funnel API shape, GitHub repo scope (single vs. multi), AoD agent choice (general-purpose-engineer vs. Tidepool-specific).
+- **phase-5-build-slice-2** — execute loop (AoD dispatch, SSE stream proxy, PR review surface). Blocked on slice-1 merge + AoD spike result.
+- **phase-6-build-slice-3** — follow-up loop (PostHog funnel widget, Honeycomb signals, anomaly path). Blocked on PostHog spike result.
 
 ## Gates pending human input
 
-- **G2** — architecture accepted with AoD override (ADR-0007). Human must green-light scope of first build slice before `general-purpose-engineer` is dispatched to build.
+- **G3 (first)** — slice acceptance. Once slice-1 deploys and the Render URL is verified, tech-lead summarizes and asks: "Ship this slice live to users? Move to slice-2?"
 
 ## Done (last 5)
 
