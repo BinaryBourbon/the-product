@@ -1,0 +1,15 @@
+# [PRODUCT NAME] Ends the Manual Detective Work of Cross-Tool Investigations
+
+## When you already know the answer is in GitHub, PostHog, and Honeycomb — you just have to find it — [PRODUCT NAME] follows the links so you don't have to.
+
+**San Francisco, May 6, 2026** — [PRODUCT NAME] today launched the first cross-tool latent-graph traversal interface for engineering teams, connecting GitHub, PostHog, and Honeycomb into a single traversable index. Software engineers, tech leads, and engineering managers mid-investigation can now start with any object — a user ID, a commit SHA, an event name, a deploy timestamp, an error fingerprint — and follow every linked record across all three tools in one action per hop instead of one tool-switch and re-query per hop.
+
+> "I was staring at a PostHog funnel drop and I knew the commit that caused it was somewhere in GitHub from last Thursday. Then I had to find the traces in Honeycomb to confirm. Normally that's thirty minutes of copying identifiers between browser tabs. With [PRODUCT NAME], I put in the event name and had the linked commit and the anomalous spans on screen in under two minutes. The investigation didn't change — the mechanical work just disappeared." — Staff engineer, B2B SaaS company
+
+The pain [PRODUCT NAME] solves is not tab-switching. It is the mechanical translation tax at every hop in a cross-tool investigation. A user ID that triggered a PostHog error event also appears in Honeycomb traces and maps to a GitHub deploy from the same afternoon — but none of those tools know that. Today, assembling that chain of evidence requires manually extracting an identifier from one query result, reformulating it as a search in the next tool, and repeating. A routine investigation involves three to five of these manual extraction-translation-requery cycles. [PRODUCT NAME] eliminates them.
+
+[PRODUCT NAME] builds a cross-tool joined index across GitHub, PostHog, and Honeycomb. Every commit, pull request, event, user property, trace, and span is indexed against its shared identifiers and timestamps. When you query any object, [PRODUCT NAME] surfaces everything in any connected tool that refers to the same object or is linked to it by a shared identifier or timestamp proximity. The result is a traversable graph: one action per hop, every hop, until the full chain of evidence is assembled. This is not a dashboard. It is closer to a universal search interface where the corpus is the union of your connected tools and the edges are the identifiers those tools already share.
+
+> "The thing that surprised me was that the links were already there — they existed in the data. A commit SHA shows up in GitHub, in a PostHog deploy event, and in Honeycomb span metadata all the time. [PRODUCT NAME] just made them visible. My first week I found three correlations I never would have caught manually, because I would have stopped after the second hop." — Engineering manager, developer-tooling company
+
+[PRODUCT NAME] is available today for teams using GitHub, PostHog, and Honeycomb. Connect your tools and start your first traversal at [[PRODUCT NAME] website].
