@@ -8,27 +8,17 @@ Tidepool is the working environment where engineers and product managers plan, e
 
 ## Concrete scenario
 
-An engineer and PM ship a checkout-page redesign behind a PostHog feature flag (`checkout-v2`). The engineer writes code in VS Code (launched via deep-link from Tidepool), opens and merges a GitHub PR, and enables the flag at 10% rollout — all tracked in a single Tidepool work item. Twenty-four hours later, both check Tidepool's Follow-up View: the PostHog checkout funnel shows +6.2pp conversion. The PM marks the loop done. If a latency regression had appeared instead, a one-step graph traversal (PostHog event → GitHub PR → Honeycomb trace) would surface the cause inline and prompt a new work item.
+An engineer and PM ship a checkout-page redesign behind a PostHog feature flag (`checkout-v2`). The engineer describes the change as a prompt in Tidepool; a coding agent makes the changes and opens a GitHub PR automatically. The engineer reviews the PR inside Tidepool, iterates with a follow-up prompt if needed, merges, and enables the flag at 10% rollout — all without leaving Tidepool. Twenty-four hours later, both check Tidepool's Follow-up View: the PostHog checkout funnel shows +6.2pp conversion. The PM marks the loop done. If a latency regression had appeared instead, a one-step graph traversal (PostHog event → GitHub PR → Honeycomb trace) would surface the cause inline and prompt a new work item.
 
 ---
 
-## Code-editing position: Option B — Launched IDE with deep-linking
+## Execute model: prompt-driven coding agents (per ADR-0006)
 
-**Decision:** v0 delegates code editing to the user's existing IDE (VS Code in the primary case) via a deep-link. Tidepool does not include an embedded editor in v0.
+**Decision:** The Option A vs. Option B (embedded editor vs. launched IDE) debate is moot — both were rejected at G2. The v0 Execute phase is **prompt-driven**: users describe the change they want in natural language; a coding agent makes the change and opens a PR automatically; users review, iterate via follow-up prompts, and merge — without leaving Tidepool.
 
-**Rationale:**
+Manual editing is a deliberate leak-through: if a user needs to edit specific code by hand, they clone the branch themselves. No Tidepool UI is provided for this.
 
-1. **Prove the loop before proving the editor.** The core Tidepool claim is that plan, execute, and follow-up belong in one continuous surface. That claim can be validated — and challenged — before solving the hard problems of a production code editor (LSP integration, git conflict resolution, extension ecosystem). v0 should prove the loop is valuable; a later slice can pull code editing in-product if the evidence supports it.
-
-2. **Build cost.** A production-quality embedded editor (Monaco + LSP + terminal + git UI) is a multi-sprint investment that competes directly with VS Code and Cursor on ground they have spent years on. Option B ships a testable v0 with a fraction of that investment.
-
-3. **The "replaces the IDE" claim does not require owning every pixel.** What Tidepool replaces is the IDE as the *organizing surface* — the place where work is planned, context lives, and outcomes are measured. The IDE as a *text editing tool* is a narrower claim and a lower-priority wedge. Deep-linking means Tidepool remains the organizing surface while VS Code handles the text editing surface.
-
-4. **Precedent.** Linear opens GitHub PRs in GitHub. Notion opens Figma in Figma. These products own the *work graph*, not every tool in the graph. Tidepool's version of this is: own the plan/follow-up loop; launch the editor for the write-code step; pull the engineer back via a return link.
-
-**Challenge this.** If the G2 engineer believes Option A is the right v0 wedge — that the embedded editor is what makes Tidepool legibly different from a project tracker — this should be debated before engineering begins. The counter-argument (Option A) is that without owning the editor surface, Tidepool is a wrapper around GitHub + PostHog + a task tracker, and users will not adopt a new "organizing surface" unless it also removes the friction of their current text editor. That argument is plausible and worth testing.
-
-**Re-evaluate when:** A user research session shows that engineers adopt tools bottom-up from the edit loop outward (i.e., they would only use Tidepool if it were also their editor), not top-down from planning.
+The specific coding agent runtime (Claude Code subprocess, AoD, Cursor agent API, custom wrapper, etc.) is an **open question for the architect at G2**. See **ADR-0006** for the full decision record and the human's verbatim rationale.
 
 ---
 
@@ -39,7 +29,7 @@ An engineer and PM ship a checkout-page redesign behind a PostHog feature flag (
 | 1 | Work Item View (Plan) | Plan | The primary planning surface. Shows work item title, description, owner, feature flag name, and an editable acceptance metric. A context panel auto-loads related GitHub history, PostHog baselines, and past decisions. The user completes this view before execution begins. |
 | 2 | Context Panel (expanded) | Plan | An inline panel surfacing auto-linked context: related GitHub PRs/commits, PostHog funnel baselines, and linked past decisions. Manually extensible. Graph traversal is available from here if context is missing. |
 | 3 | Graph Traversal View | Plan / Follow-up | A one-step-per-hop traversal of the cross-tool latent graph. Entry: any identifier (commit SHA, event name, PR number). Shows linked objects across GitHub, PostHog, and Honeycomb. Findings can be pinned to the work item or used to create a new work item. |
-| 4 | Execute View | Execute | A sequential checklist of concrete actions: (1) branch created, (2) write code → Open in VS Code, (3) PR merged (auto-detected), (4) enable feature flag. Each step has a status (pending / active / done) and is driven by Tidepool API calls where possible. |
+| 4 | Execute View | Execute | prompt input → agent run progress (streamed) → PR review surface → iterate via follow-up prompt or merge. Steps: (1) describe the change as a prompt, (2) agent works (live status), (3) PR opens automatically, (4) review and approve / iterate / discard, (5) enable feature flag. |
 | 5 | Follow-up View (success) | Follow-up | Shown 24h after ship (or on demand). Primary widget: before/after PostHog funnel metric vs. acceptance metric. Secondary panel: what shipped (PR, flag config). Signals panel: Honeycomb error rate and latency health. CTAs: Mark as Done or Increase rollout. |
 | 6 | Follow-up View (anomaly) | Follow-up | Shown when the metric did not move or a regression is detected. Inline graph traversal surfaces the chain: PostHog event → GitHub PR → Honeycomb trace. CTAs: create follow-on work item, roll back flag. |
 
@@ -57,10 +47,12 @@ The v0 slice is done when all of the following are true:
 - [ ] Clicking "Start executing" transitions the work item state from Plan → Executing and renders the Execute View
 
 **Execute phase**
+- [ ] A prompt input field is available on the work item in Executing state
+- [ ] Submitting a prompt dispatches a coding agent run; the run's live progress streams into the Execute View
+- [ ] The coding agent's PR appears in Tidepool's PR-review surface automatically when the agent opens it
+- [ ] A user can send a follow-up prompt to iterate on the agent's work without leaving Tidepool
+- [ ] A user can manually merge the PR from Tidepool's PR-review surface
 - [ ] Tidepool calls the GitHub API to create a branch named `feat/<work-item-slug>` when execution begins
-- [ ] "Open in VS Code" fires a deep-link that opens VS Code at the correct branch; the link is functional on macOS with VS Code installed
-- [ ] A VS Code extension (or URI handler) provides a "Return to Tidepool" button that re-focuses the Tidepool browser tab
-- [ ] Tidepool polls the GitHub API for PR status; the checklist step auto-completes when the PR is detected as merged
 - [ ] A user can set a rollout percentage and call the PostHog API to enable the feature flag from within Tidepool
 - [ ] Enabling the flag transitions work item state to Shipped and records a ship timestamp
 
@@ -86,7 +78,7 @@ These are real Tidepool features explicitly excluded from this slice:
 
 | Feature | Reason for deferral |
 |---|---|
-| Embedded code editor (Option A) | High build cost; loop can be validated without it; explicit architectural bet for later slice |
+| Editor of any kind (embedded OR launched) | ADR-0006 — execute is prompt-driven; manual editing is leak-through (user clones branch locally if needed) |
 | Multi-user collaboration (shared work items, comments, @-mentions) | Adds real-time sync complexity; single-user loop proves the concept |
 | Full graph traversal UI (multi-hop explorer, graph visualization) | v0 needs one pre-populated hop in the anomaly path; a full traversal explorer is a later feature |
 | Linear, Sentry, Datadog, PagerDuty integrations | Out of scope per ADR-0004; GitHub + PostHog + Honeycomb only |
