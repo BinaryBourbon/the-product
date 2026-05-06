@@ -20,7 +20,7 @@ _Nothing in flight yet — pre-G0._
 
 ## Done (last 5)
 
-_Nothing yet._
+- **loop-test/add-contributing-md** — dispatched `general-purpose-engineer` (conv `e2bfc3fc-244a-4555-9f20-e24288bca511`) to add one-line `CONTRIBUTING.md` → BinaryBourbon/the-product PR pending.
 
 ---
 
