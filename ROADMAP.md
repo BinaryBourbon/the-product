@@ -20,6 +20,7 @@ _Nothing in flight yet — pre-G0._
 
 ## Done (last 5)
 
+- **pr-template** — `general-purpose-engineer` (conv `bf816216`) adding `.github/PULL_REQUEST_TEMPLATE.md` with Summary / What this slice unlocks / Acceptance sections. Dispatched 2026-05-06.
 - **loop-test/add-contributing-md** — `general-purpose-engineer` (conv `e2bfc3fc`) added one-line `CONTRIBUTING.md`; PR #1 reviewed and merged. Shipped.
 
 ---
