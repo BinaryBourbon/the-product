@@ -26,3 +26,5 @@ You are almost certainly an agent reading this. Two rules:
 ## Bootstrap
 
 This repo is consumed by the `tech-lead` agent definition in [`jhgaylor/aod-specs`](https://github.com/jhgaylor/aod-specs/blob/main/agents/tech-lead.yml), which mounts it via the `the-product` environment.
+
+<!-- verified via Tidepool slice-2 dispatch -->
