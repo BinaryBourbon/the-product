@@ -4,19 +4,20 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-- **phase-3-architecture** — in flight: `general-purpose-engineer` (architect) dispatched; producing `specs/v0/architecture.md`. Key open question: coding agent runtime.
+_Nothing in flight — awaiting G2 green-light on first build slice scope._
 
 ## Next (≤3 queued)
 
-_Nothing queued — blocked on G2._
+- **phase-4-build-slice-1** — queued; awaiting human scope approval before dispatch. Architecture is settled (ADR-0006 + ADR-0007). Three open spikes to resolve: PostHog funnel API shape, GitHub repo scope (single vs. multi), AoD agent choice (general-purpose-engineer vs. Tidepool-specific).
 
 ## Gates pending human input
 
-- **G2** — architecture. Once `specs/v0/architecture.md` lands, tech-lead summarizes and asks: "Are we aligned on the tech direction?" Key decision: coding agent runtime (Claude Code subprocess / AoD / Codex / custom).
+- **G2** — architecture accepted with AoD override (ADR-0007). Human must green-light scope of first build slice before `general-purpose-engineer` is dispatched to build.
 
 ## Done (last 5)
 
-- **phase-2-design** — `designer` (conv `689651fc`) produced `design/v0/` + `specs/v0/spec.md`; PR #6 merged at `f284c66`. G2 gate open: execute model amended to prompt-driven per ADR-0006 (VS Code deep-link rejected). See ADR-0006.
+- **phase-3-architecture** — `general-purpose-engineer` (conv `0095e9ad`) produced `specs/v0/architecture.md`; PR #7 merged at `6cb23f1`. G2 closed: AoD override applied per ADR-0007 (Claude Code subprocess rejected). See ADR-0006, ADR-0007.
+- **phase-2-design** — `designer` (conv `689651fc`) produced `design/v0/` + `specs/v0/spec.md`; PR #6 merged at `f284c66`. Execute model amended to prompt-driven per ADR-0006. See ADR-0006.
 - **phase-1-narrative** — `growth-marketer` (conv `10fdf4c5`) produced `narrative/phase-1-press-release.md`; PR #5 merged at `9b20632`. G1 closed: framing approved, product named Tidepool. See ADR-0004, ADR-0005.
 - **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B + two reframes. See ADR-0002 → ADR-0003 → ADR-0004.
 - **pr-template** — `general-purpose-engineer` (conv `bf816216`) added `.github/PULL_REQUEST_TEMPLATE.md`; PR #2 merged at `d916581`. Shipped.
