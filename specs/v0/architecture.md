@@ -31,7 +31,7 @@ Tidepool v0 deploys on **Render** using two service types:
 | `tidepool-web` | Web Service (Node) | Serves the Next.js frontend and all API routes, including the SSE streaming endpoint |
 | `tidepool-db` | PostgreSQL | Managed Postgres database; Render injects `DATABASE_URL` automatically |
 
-A **Background Worker** service is not needed for v0. Agent runs are spawned as child processes by the web service and stream output back over SSE directly. If agent run concurrency becomes a problem (see §9), the worker can be extracted later.
+A **Background Worker** service is not needed for v0. Agent runs are dispatched to AoD via HTTP; Tidepool proxies the AoD SSE stream back to the browser. If agent run concurrency becomes a problem, a worker can be extracted later.
 
 ### Environment variables
 
@@ -39,11 +39,14 @@ All integration credentials are environment variables set in the Render dashboar
 
 ```
 DATABASE_URL          # injected by Render
-ANTHROPIC_API_KEY     # for Claude Code CLI / API
-GITHUB_TOKEN          # GitHub API token
+AOD_BASE_URL          # AoD instance URL (default: https://jake-bagzz.sprites.app)
+AOD_TOKEN             # AoD bearer token — Render sync:false secret; NEVER commit the value
+GITHUB_TOKEN          # GitHub API token (Tidepool-side: branch creation, diff, merge)
 POSTHOG_TOKEN         # PostHog API token
 HONEYCOMB_KEY         # Honeycomb API key
 ```
+
+Note: no `claude` CLI, no `gh` CLI, and no `ANTHROPIC_API_KEY` are needed in Tidepool's Render environment. Those dependencies live inside AoD's sprites, not Tidepool's web service.
 
 ### Release process
 
@@ -54,43 +57,57 @@ HONEYCOMB_KEY         # Honeycomb API key
 
 ---
 
-## 3. Coding Agent Runtime — Claude Code as a subprocess
+## 3. Coding Agent Runtime — jhgaylor/aod-ex (per ADR-0007)
 
-**Decision: Claude Code CLI spawned as a sandboxed subprocess.**
+**Decision: AoD (Agent on Demand), accessed via HTTP API.**
 
-### Rationale
+The architect's original choice (Claude Code CLI subprocess) was overridden at G2. See **ADR-0007** for the full decision record. The AoD multi-turn critique in the original spec was incorrect: AoD supports multi-turn via `POST /api/conversations/<id>/prompts` with `runtime_session_id` capture. The Claude Code subprocess approach is not used.
 
-ADR-0006 established that v0 Execute is prompt-driven: a user writes a prompt, a coding agent reads the repo, makes changes, and opens a PR. The runtime choice is load-bearing because it determines quality on multi-file changes, operational complexity, and vendor surface area.
+### Dispatch (initial prompt)
 
-**Why Claude Code:**
+```
+POST $AOD_BASE_URL/api/conversations
+Authorization: Bearer $AOD_TOKEN
+Content-Type: application/json
 
-- **Quality on multi-file changes.** Claude Code is designed for exactly this: it reads repo context, reasons across files, runs tests, and opens PRs. The other options (AoD, Codex, custom wrapper) all require building or extending the agentic loop that Claude Code provides out of the box.
-- **Dogfooding.** The team already uses Claude Code. Tidepool running Claude Code under the hood is the most direct form of dogfooding the product's own infrastructure.
-- **Multi-turn support.** Follow-up prompts (the iterate loop in ADR-0006 and the wireframes) are naturally supported: each follow-up spawns a new Claude Code invocation on the same branch; the agent reads the current state of the branch (including the open PR) and applies the incremental change.
-- **PR opening is native.** Claude Code can open PRs via the GitHub CLI (`gh pr create`) as part of its tool loop. No custom PR-opening logic is needed.
+{ "agent_id": "<agent_id>", "vault_id": "<vault_id>", "prompt": "<user prompt>" }
+```
 
-**Why not the alternatives:**
+Response includes `data.id` (the AoD conversation ID). Tidepool writes this to `agent_runs.aod_conversation_id` immediately and returns the `agent_run.id` to the client.
 
-- **AoD** — tuned for single-turn specialist work; the multi-turn coding loop would require non-trivial extension. The AoD infrastructure is valuable but not the right fit for an interactive coding agent.
-- **OpenAI Codex / Responses API** — introduces a second AI vendor with no clear quality advantage for repo-aware multi-file changes; file-system tooling is newer and less battle-tested than Claude Code's.
-- **Custom thin wrapper** — building a reliable agentic loop (tool routing, error recovery, test running, PR opening) is non-trivial. Claude Code is the custom wrapper, already built.
+### Multi-turn (follow-up prompt)
 
-### How it works
+```
+POST $AOD_BASE_URL/api/conversations/<aod_conversation_id>/prompts
+Authorization: Bearer $AOD_TOKEN
+Content-Type: application/json
 
-1. When the user submits a prompt, the backend clones the work item's GitHub branch into a temporary directory (`/tmp/runs/<run-id>`).
-2. The backend spawns `claude --dangerously-skip-permissions -p "<prompt>"` as a child process in that directory, with `ANTHROPIC_API_KEY` in the environment.
-3. stdout lines are read incrementally and streamed to the client via SSE (see §7).
-4. When Claude Code completes, it will have committed changes and opened a PR via `gh`. The backend scans the stdout for the PR URL, extracts the PR number, and writes a `PullRequest` record to the database.
-5. The temporary clone is deleted after the run completes or fails.
+{ "prompt": "<follow-up prompt>" }
+```
 
-### Key dependency
+AoD resumes the same agent session. The client sends the follow-up to Tidepool's `/api/runs/[id]/followup` route; Tidepool relays it to AoD using the stored `aod_conversation_id`.
 
-The Render web service environment must have:
-- `claude` CLI installed (via npm: `npm install -g @anthropic-ai/claude-code`)
-- `gh` CLI installed (GitHub CLI, for PR creation)
-- `git` available (standard in Render's build environment)
+### Streaming
 
-This is installed in the Docker build step / Render build command. See §9 for the spike needed to validate this.
+```
+GET $AOD_BASE_URL/api/conversations/<aod_conversation_id>/stream
+Authorization: Bearer $AOD_TOKEN
+```
+
+Tidepool proxies this SSE stream: it opens the AoD stream server-side, appends each event to `agent_runs.stream_log`, and re-emits it to the browser client as Tidepool's own SSE endpoint (`/api/runs/[id]/stream`). `Last-Event-ID` reconnection works because Tidepool replays from `stream_log` on reconnect (see §7).
+
+### PR detection
+
+The AoD agent opens its PR via its own GitHub MCP (using its configured vault, e.g. binarybourbon). Tidepool does **not** parse AoD stdout for a PR URL. Instead, after the agent run status transitions to `complete`, Tidepool polls `GET /repos/{owner}/{repo}/pulls?head={branch}&state=open` to detect the PR — clean separation between Tidepool's GitHub token and the agent's vault credentials.
+
+### Auth
+
+Tidepool → AoD: `Authorization: Bearer $AOD_TOKEN`.
+AoD agent → GitHub: uses the agent's vault (binarybourbon or a Tidepool-specific vault). Tidepool never holds the agent's GitHub token.
+
+### No local clones, no CLI dependencies
+
+Unlike the subprocess approach, Tidepool does not clone any repos, does not install `claude` or `gh` CLIs, and does not require `ANTHROPIC_API_KEY`. All of those dependencies live inside AoD's sprites.
 
 ---
 
@@ -130,7 +147,8 @@ One record per prompt submission (initial or follow-up).
 | `prompt` | text | the user's prompt |
 | `status` | enum | `pending \| running \| complete \| failed \| cancelled` |
 | `stream_log` | jsonb | array of `{t: timestamp, line: string}` entries; appended as agent streams |
-| `github_pr_number` | int nullable | set when Claude Code opens the PR |
+| `aod_conversation_id` | UUID nullable, indexed | AoD conversation ID; set on dispatch; used for multi-turn follow-up and stream proxy |
+| `github_pr_number` | int nullable | set when AoD agent opens the PR (detected via GitHub poll) |
 | `started_at` | timestamptz | |
 | `completed_at` | timestamptz | |
 
@@ -244,13 +262,14 @@ The **Merge PR** CTA calls `PUT /repos/{owner}/{repo}/pulls/{pr}/merge` directly
 ### Stream path
 
 ```
-Claude Code subprocess
-  │ (stdout, line-by-line)
+AoD conversation stream
+  │ GET $AOD_BASE_URL/api/conversations/<id>/stream (SSE)
+  │ Authorization: Bearer $AOD_TOKEN
   ▼
 Next.js API route (/api/runs/[id]/stream)
-  │ reads stdout via Node.js readline
-  │ appends each line to agent_runs.stream_log (JSONB)
-  │ emits SSE event to connected client
+  │ proxies AoD SSE events
+  │ appends each event to agent_runs.stream_log (JSONB)
+  │ re-emits as Tidepool SSE event to connected client
   ▼
 Browser EventSource
   │ receives events, appends to agent run UI
@@ -260,11 +279,11 @@ Execute View (streamed progress)
 
 ### Reconnection
 
-The SSE endpoint accepts a `?lastEventId=<n>` query param (mapped from the `Last-Event-ID` header). On reconnect, the backend reads `agent_runs.stream_log` from line `n` onward and replays the missed lines before resuming live streaming. This covers browser tab refreshes and dropped connections mid-run without losing log history.
+The Tidepool SSE endpoint (`/api/runs/[id]/stream`) accepts `Last-Event-ID`. On reconnect, the backend replays `agent_runs.stream_log` from the indicated offset before resuming the live AoD stream proxy. This covers browser tab refreshes and dropped connections without losing log history. The AoD stream itself uses `wait=false` when the conversation is already complete (replay-only mode).
 
 ### Run cancel
 
-The **Cancel** button in the wireframes sends `DELETE /api/runs/[id]`. The backend sends `SIGTERM` to the Claude Code child process, marks the run `cancelled`, and closes the SSE stream.
+The **Cancel** button sends `DELETE /api/runs/[id]`. Tidepool calls `POST $AOD_BASE_URL/api/conversations/<aod_conversation_id>/terminate`, marks the run `cancelled` in the database, and closes the client SSE stream.
 
 ---
 
@@ -310,12 +329,8 @@ State is authoritative in the database. On page load, Tidepool reads the work it
 
 These are decisions the spec and design cannot resolve — each requires a spike before the architecture can be considered final.
 
-1. **Claude Code CLI in Render's build environment.** Can `claude` and `gh` CLIs be installed in a Render Web Service's build step and used in a subprocess? Render's build environment is a standard Linux container, but subprocess execution of long-running CLI tools (with stdin/stdout streaming) at request time needs validation. The spike: write a minimal Render Web Service that spawns `claude --version` and streams stdout back as SSE.
+1. **PostHog funnel API shape for before/after queries.** The spec requires a "baseline captured at plan time" and an "after value queried at follow-up time." PostHog's Insights API supports funnel queries, but the exact parameters for time-windowed funnel conversion rates (date ranges, breakdown by flag cohort) need to be verified against the PostHog API docs before building the Follow-up View widget.
 
-2. **PostHog funnel API shape for before/after queries.** The spec requires a "baseline captured at plan time" and an "after value queried at follow-up time." PostHog's Insights API supports funnel queries, but the exact parameters for time-windowed funnel conversion rates (date ranges, breakdown by flag cohort) need to be verified against the PostHog API docs before building the Follow-up View widget.
+2. **GitHub repository scope.** The v0 spec implies a single GitHub repo per Tidepool instance. This needs to be made explicit: is the target repo a global config setting, or can different work items target different repos? The data model has `github_repo` on `pull_requests` (which allows multiple repos), but the GitHub token and branch-creation flow assume one repo. A decision here affects the settings surface (even though onboarding/settings are out of scope for v0, the data model must accommodate the answer).
 
-3. **Claude Code non-interactive output format.** When spawned as `claude -p "<prompt>"` (non-interactive / print mode), does Claude Code emit structured output (JSON lines) or free-form text? The stream log renderer and PR number extraction logic depend on the answer. The spike: run `claude -p "list files in the current directory"` in a test repo and inspect stdout format.
-
-4. **GitHub repository scope.** The v0 spec implies a single GitHub repo per Tidepool instance. This needs to be made explicit: is the target repo a global config setting, or can different work items target different repos? The data model above has `github_repo` on `pull_requests` (which allows multiple repos), but the GitHub token and branch-creation flow assume one repo. A decision here affects the settings surface (even though onboarding/settings are out of scope for v0, the data model must accommodate the answer).
-
-5. **Temporary clone storage on Render.** Claude Code needs a local git clone to operate. Render Web Services have ephemeral local disk; large repos may be slow to clone on every agent run. The spike: measure clone time for a representative repo size. If clone time exceeds ~30s, a shallow clone strategy (`--depth=1 --branch=<branch>`) or a warm-clone cache is needed.
+3. **Which AoD agent does Tidepool dispatch?** Option A: reuse the existing `general-purpose-engineer` agent (already defined, broader capability, may scope-creep — the agent has a habit of editing roadmaps, writing ADRs, etc.). Option B: define a new Tidepool-specific agent with an execute-only system prompt (tighter scope, cleaner for coding tasks, but adds another agent definition to maintain). This decision determines the `agent_id` sent in the dispatch call and affects how much prompt engineering Tidepool must do vs. relying on the agent's own system prompt. Decide before the first build slice begins.
