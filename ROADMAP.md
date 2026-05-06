@@ -4,13 +4,12 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-- **phase-4-build-slice-1** — in flight: `general-purpose-engineer` dispatched; building BinaryBourbon/tidepool repo (Next.js + Postgres + CRUD + Render deploy). Branch: `slice-1/foundation`.
-- **phase-4-spike-posthog-funnel-api** — in flight: `general-purpose-engineer` dispatched; researching PostHog Insights API shape for funnel before/after queries. Output: `research/posthog-funnel-api.md` in this repo.
+- **phase-4-build-slice-1** — in flight: `general-purpose-engineer` (conv `ca41387e`) building BinaryBourbon/tidepool (Next.js + Postgres + CRUD + Render deploy). Branch: `slice-1/foundation`.
 
 ## Next (≤3 queued)
 
-- **phase-5-build-slice-2** — execute loop (AoD dispatch, SSE stream proxy, PR review surface). Blocked on slice-1 merge + AoD spike result.
-- **phase-6-build-slice-3** — follow-up loop (PostHog funnel widget, Honeycomb signals, anomaly path). Blocked on PostHog spike result.
+- **phase-5-build-slice-2** — execute loop (AoD dispatch, SSE stream proxy, PR review surface). Blocked on slice-1 merge.
+- **phase-6-build-slice-3** — follow-up loop (PostHog funnel widget, Honeycomb signals, anomaly path). PostHog API shape resolved — see `research/posthog-funnel-api.md`. Note: `POSTHOG_PROJECT_ID` must be added to Render env vars (gap found in spike).
 
 ## Gates pending human input
 
@@ -18,7 +17,8 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Done (last 5)
 
-- **phase-3-architecture** — `general-purpose-engineer` (conv `0095e9ad`) produced `specs/v0/architecture.md`; PR #7 merged at `6cb23f1`. G2 closed: AoD override applied per ADR-0007 (Claude Code subprocess rejected). See ADR-0006, ADR-0007.
+- **phase-4-spike-posthog-funnel-api** — `general-purpose-engineer` (conv `9f1461aa`) produced `research/posthog-funnel-api.md`; PR #8 merged at `c1cd641`. PostHog FunnelsQuery API documented; flag cohort filter approach confirmed; `POSTHOG_PROJECT_ID` env var gap identified.
+- **phase-3-architecture** — `general-purpose-engineer` (conv `0095e9ad`) produced `specs/v0/architecture.md`; PR #7 merged at `6cb23f1`. G2 closed: AoD override applied per ADR-0007. See ADR-0006, ADR-0007.
 - **phase-2-design** — `designer` (conv `689651fc`) produced `design/v0/` + `specs/v0/spec.md`; PR #6 merged at `f284c66`. Execute model amended to prompt-driven per ADR-0006. See ADR-0006.
 - **phase-1-narrative** — `growth-marketer` (conv `10fdf4c5`) produced `narrative/phase-1-press-release.md`; PR #5 merged at `9b20632`. G1 closed: framing approved, product named Tidepool. See ADR-0004, ADR-0005.
 - **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B + two reframes. See ADR-0002 → ADR-0003 → ADR-0004.
