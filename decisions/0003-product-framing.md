@@ -1,6 +1,6 @@
 # ADR-0003: Product framing — cross-tool latent-graph traversal
 
-- **Status:** accepted
+- **Status:** superseded by ADR-0004
 - **Date:** 2026-05-06
 - **Decider:** human (G0 decision)
 - **Slice:** phase-0-framing

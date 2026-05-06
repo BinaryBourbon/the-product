@@ -4,19 +4,19 @@ Single source of truth for what's open. If this doc is longer than one screen, k
 
 ## Now (≤2 slices in flight)
 
-_Nothing in flight._
+- **phase-1-narrative** — in flight: `growth-marketer` (v2) dispatched against ADR-0004; awaiting PR with `narrative/phase-1-press-release.md`.
 
 ## Next (≤3 queued)
 
-- **phase-1-narrative** — `growth-marketer` dispatched; awaiting PR with `narrative/phase-1-press-release.md`. Blocked on G1.
+_Nothing queued — blocked on G1._
 
 ## Gates pending human input
 
-- **G1** — narrative. Once `narrative/phase-1-press-release.md` lands, tech-lead summarizes and asks: "Does this product, described this way, sound worth building?"
+- **G1** — narrative (reopened). PR #4 closed (framing too narrow — cross-tool graph described as product, not capability). New `growth-marketer` dispatched against ADR-0004 (workspace replacing IDE, engineers + PMs, plan/execute/follow-up). Once new PR lands, tech-lead summarizes and asks: "Does this product, described this way, sound worth building?"
 
 ## Done (last 5)
 
-- **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B selected with reframe (cross-tool latent-graph traversal, not dashboard). See ADR-0002, ADR-0003.
+- **phase-0-framing** — `customer-researcher` (conv `69d5a6eb`) produced `discovery/phase-0-framing.md`; PR #3 merged at `2baac8e`. G0 closed: Candidate B + two reframes. See ADR-0002 → ADR-0003 → ADR-0004.
 - **pr-template** — `general-purpose-engineer` (conv `bf816216`) added `.github/PULL_REQUEST_TEMPLATE.md`; PR #2 merged at `d916581`. Shipped.
 - **loop-test/add-contributing-md** — `general-purpose-engineer` (conv `e2bfc3fc`) added one-line `CONTRIBUTING.md`; PR #1 reviewed and merged. Shipped.
 
